@@ -46,7 +46,7 @@ class EditActivity : AppCompatActivity(),
         menu!!.apply {
             findItem(R.id.menu_delete).isVisible = false
             findItem(R.id.menu_edit).isVisible = false
-            findItem(R.id.menu_register).isVisible = true
+            findItem(R.id.menu_register).isVisible = false
         }
         return true
     }

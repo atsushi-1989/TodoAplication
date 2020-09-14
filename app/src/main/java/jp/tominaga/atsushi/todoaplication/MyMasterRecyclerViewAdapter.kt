@@ -4,13 +4,17 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import io.realm.RealmResults
 
 
 import jp.tominaga.atsushi.todoaplication.MasterFragment.OnListFragmentInteractionListener
-import jp.tominaga.atsushi.todoaplication.dummy.DummyContent.DummyItem
+
 
 import kotlinx.android.synthetic.main.fragment_master.view.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * [RecyclerView.Adapter] that can display a [DummyItem] and makes a call to the
@@ -18,7 +22,7 @@ import kotlinx.android.synthetic.main.fragment_master.view.*
  * TODO: Replace the implementation with code for your data type.
  */
 class MyMasterRecyclerViewAdapter(
-    private val mValues: List<DummyItem>,
+    private val mValues: RealmResults<TodoModel>,
     private val mListener: OnListFragmentInteractionListener?
 ) : RecyclerView.Adapter<MyMasterRecyclerViewAdapter.ViewHolder>() {
 
@@ -26,7 +30,7 @@ class MyMasterRecyclerViewAdapter(
 
     init {
         mOnClickListener = View.OnClickListener { v ->
-            val item = v.tag as DummyItem
+            val item = v.tag as TodoModel
             // Notify the active callbacks interface (the activity, if the fragment is attached to
             // one) that an item has been selected.
             mListener?.onListFragmentInteraction(item)
@@ -41,9 +45,16 @@ class MyMasterRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mValues[position]
-        holder.mIdView.text = item.id
-        holder.mContentView.text = item.content
-
+        holder.textViewTitle.text = item!!.title
+        holder.textViewDeadline.text = MyApplication.appContext.getString(R.string.deadline)+ " : "+ item.deadLine
+        //Todo Cardの先頭画像(期限切れの場合とまだの場合でわける
+        val changedDeadline = SimpleDateFormat("yyyy/MM/dd").parse(item.deadLine)
+        val today = Date()
+        if (today >= changedDeadline){
+            holder.imageStatus.setImageResource(R.drawable.ic_warning_black_24dp)
+        }else{
+            holder.imageStatus.setImageResource(R.drawable.ic_work_black_24dp)
+        }
         with(holder.mView) {
             tag = item
             setOnClickListener(mOnClickListener)
@@ -53,11 +64,10 @@ class MyMasterRecyclerViewAdapter(
     override fun getItemCount(): Int = mValues.size
 
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
-        val mIdView: TextView = mView.item_number
-        val mContentView: TextView = mView.content
+        val textViewTitle : TextView = mView.findViewById(R.id.textViewTitle)
+        val textViewDeadline : TextView = mView.findViewById(R.id.textViewDeadline)
+        val imageStatus : ImageView = mView.findViewById(R.id.imageView)
 
-        override fun toString(): String {
-            return super.toString() + " '" + mContentView.text + "'"
-        }
+
     }
 }

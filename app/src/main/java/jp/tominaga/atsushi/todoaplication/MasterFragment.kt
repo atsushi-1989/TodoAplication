@@ -2,16 +2,16 @@ package jp.tominaga.atsushi.todoaplication
 
 import android.content.Context
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import io.realm.Realm
+import io.realm.RealmObject
+import io.realm.Sort
 
-import jp.tominaga.atsushi.todoaplication.dummy.DummyContent
-import jp.tominaga.atsushi.todoaplication.dummy.DummyContent.DummyItem
+
 
 /**
  * A fragment representing a list of Items.
@@ -33,11 +33,9 @@ class MasterFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_master_list, container, false)
+        setHasOptionsMenu(true)
 
         // Set the adapter
         if (view is RecyclerView) {
@@ -46,10 +44,33 @@ class MasterFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = MyMasterRecyclerViewAdapter(DummyContent.ITEMS, listener)
+
+                val realm = Realm.getDefaultInstance()
+                val result = realm.where(TodoModel::class.java).equalTo(TodoModel::isConpleted.name, false)
+                    .sort(TodoModel::deadLine.name, Sort.ASCENDING).findAll()
+                adapter = MyMasterRecyclerViewAdapter(result, listener)
             }
         }
         return view
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu!!.apply {
+            findItem(R.id.menu_delete).isVisible = false
+            findItem(R.id.menu_edit).isVisible = false
+            findItem(R.id.menu_register).isVisible = false
+            findItem(R.id.action_settings).isVisible = true
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        if (item!!.itemId == R.id.action_settings){
+            makeToast(requireActivity()!!,getString(R.string.about_this_app))
+        }
+        return super.onOptionsItemSelected(item)
+
     }
 
     override fun onAttach(context: Context) {
@@ -79,7 +100,7 @@ class MasterFragment : Fragment() {
      */
     interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onListFragmentInteraction(item: DummyItem?)
+        fun onListFragmentInteraction(item: TodoModel)
     }
 
     companion object {

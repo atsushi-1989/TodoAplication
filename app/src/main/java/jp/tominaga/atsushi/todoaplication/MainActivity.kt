@@ -25,15 +25,21 @@ class MainActivity : AppCompatActivity(), EditFragment.OnFragmentInteractionList
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        //スマホタブレットかを判断する
+        if(findViewById<FrameLayout>(R.id.contener_detail) != null) isTwoPane = true
+
+        supportFragmentManager.beginTransaction()
+            .add(R.id.contener_master,MasterFragment.newInstance(1),FragmentTag.MASTER.toString()).commit()
+
         fab.setOnClickListener { view ->
             goEditScreen("","", "", false, ModeInEdit.NEW_ENTRY)
 
         }
 
 
-        //スマホタブレットかを判断する
-        if(findViewById<FrameLayout>(R.id.contener_detail) != null) isTwoPane = true
+
     }
+
 
     private fun goEditScreen(title : String, deadline :String, taskDetail : String, isComplete : Boolean, mode: ModeInEdit) {
         if (isTwoPane){
@@ -85,6 +91,17 @@ class MainActivity : AppCompatActivity(), EditFragment.OnFragmentInteractionList
         }
     }
 
+    override fun onResume() {
+        //スマホのEditActivityから戻ってきたらリストの更新
+        super.onResume()
+        updateTodoList()
+    }
+
+    private fun updateTodoList() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.contener_master,MasterFragment.newInstance(1),FragmentTag.MASTER.toString()).commit()
+    }
+
     // EditFragment.OnFragmentInteractionListener
     override fun onDatePikerLaunched() {
         DatePickerDialogFragment().show(supportFragmentManager, FragmentTag.DATE_PICKER.toString())
@@ -94,7 +111,9 @@ class MainActivity : AppCompatActivity(), EditFragment.OnFragmentInteractionList
 
     //EditFragment.OnFragmentInteractionListener
     override fun onDataEdited() {
-        //リストの更新処理
+        //タブレットのリストの更新
+        updateTodoList()
+
     }
 
     //DatePickerDialogFragment.OnDateSetListener
