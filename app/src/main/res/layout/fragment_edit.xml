@@ -18,6 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -34,13 +35,13 @@
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inputDeadlineText"
+                android:id="@+id/inputDate"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="5">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputDeallineText"
+                    android:id="@+id/inputDateText"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="@string/deadline"
@@ -57,6 +58,7 @@
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputTaskDetail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
