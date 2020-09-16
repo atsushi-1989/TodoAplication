@@ -73,9 +73,10 @@ class EditFragment : Fragment() {
                 checkBox.visibility = View.INVISIBLE
             }
             ModeInEdit.EDIT ->{
-
-
-
+                inputTitleText.setText(title)
+                inputDateText.setText(deadline)
+                inputDetailText.setText(taskDetail)
+                if (isCompleted!!) checkBox.isChecked = true else checkBox.isChecked = false
             }
         }
 
@@ -144,7 +145,24 @@ class EditFragment : Fragment() {
     }
 
     private fun editExistingTodo() {
-        TODO("Not yet implemented")
+        val realm = Realm.getDefaultInstance()
+        realm.beginTransaction()
+        val selectedTodo = realm.where(TodoModel::class.java)
+            .equalTo(TodoModel::title.name,title)
+            .equalTo(TodoModel::deadLine.name, deadline)
+            .equalTo(TodoModel::taskDetail.name,taskDetail)
+            .findFirst()
+
+        selectedTodo?.apply {
+            title = inputTitleText.text.toString()
+            deadLine = inputDateText.text.toString()
+            taskDetail = inputDetailText.text.toString()
+            isConpleted = if (checkBox.isChecked) true else false
+        }
+        realm.commitTransaction()
+
+        realm.close()
+
     }
 
     private fun addNewTodo() {
@@ -170,6 +188,11 @@ class EditFragment : Fragment() {
         }else{
             throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
         }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        mListener = null
     }
 
 

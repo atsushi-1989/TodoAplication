@@ -12,10 +12,14 @@ import android.widget.TextView
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.fragment_detail.*
 import kotlinx.android.synthetic.main.fragment_edit.*
 import org.w3c.dom.Text
 
-class MainActivity : AppCompatActivity(), EditFragment.OnFragmentInteractionListener, DatePickerDialogFragment.OnDateSetListener {
+class MainActivity : AppCompatActivity(), EditFragment.OnFragmentInteractionListener,
+    DatePickerDialogFragment.OnDateSetListener,
+    MasterFragment.OnListFragmentInteractionListener,
+    DetailFragment.OnFragmentInteractionListener{
 
     var isTwoPane: Boolean = false
 
@@ -49,10 +53,18 @@ class MainActivity : AppCompatActivity(), EditFragment.OnFragmentInteractionList
 //            fragmentTransaction.add(R.id.contener_detail,EditFragment.newInstance("1","1"))
 //            fragmentTransaction.commit()
 
-            supportFragmentManager.beginTransaction()
-                .add(R.id.contener_detail,EditFragment
-                    .newInstance(title, deadline, taskDetail, isComplete, mode),
-                    FragmentTag.EDIT.toString()).commit()
+            if (supportFragmentManager.findFragmentByTag(FragmentTag.EDIT.toString()) == null &&
+                supportFragmentManager.findFragmentByTag(FragmentTag.DETAIL.toString() ) == null){
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.contener_detail,EditFragment.newInstance(title,deadline,taskDetail,isComplete,mode)).commit()
+            }else{
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.contener_detail,EditFragment
+                        .newInstance(title, deadline, taskDetail, isComplete, mode),
+                        FragmentTag.EDIT.toString()).commit()
+            }
+
+
 
             return  //タブレットの処理終了
         }
@@ -120,5 +132,51 @@ class MainActivity : AppCompatActivity(), EditFragment.OnFragmentInteractionList
     override fun onDateSelected(dateString: String) {
         val inputDdateText = findViewById<EditText>(R.id.inputDateText)
         inputDdateText.setText(dateString)
+    }
+
+
+    //MasterFragment.OnListFragmentInteractionListener
+    override fun onItemClecked(item: TodoModel) {
+        goDetailScreen(item.title, item.deadLine, item.taskDetail, item.isConpleted)
+    }
+
+    private fun goDetailScreen(title: String, deadLine: String, taskDetail: String, isCompleted: Boolean) {
+        if (isTwoPane){
+            if(supportFragmentManager.findFragmentByTag(FragmentTag.EDIT.toString()) == null &&
+                    supportFragmentManager.findFragmentByTag(FragmentTag.DETAIL.toString()) == null){
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.contener_detail,DetailFragment.newInstance(title,deadLine,taskDetail,isCompleted),
+                    FragmentTag.DETAIL.toString()).commit()
+            }else {
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.contener_detail,DetailFragment.newInstance(title,deadLine,taskDetail,isCompleted),
+                    FragmentTag.DETAIL.toString()).commit()
+            }
+
+            return
+        }
+
+
+        val intent = Intent(this@MainActivity,DetailActivity::class.java).apply {
+            putExtra(IntentKey.TITLE.name,title)
+            putExtra(IntentKey.DEADLINE.name,deadLine)
+            putExtra(IntentKey.TASK_DETAIL.name,taskDetail)
+            putExtra(IntentKey.IS_COMPLETED.name,isCompleted)
+        }
+        startActivity(intent)
+
+    }
+
+
+    //DetailFragment.OnFragmentInteractionListene
+    override fun onDataDeleted() {
+        updateTodoList()
+    }
+
+
+    // DetailFragment.OnFragmentInteractionListener
+    override fun onEditSelectedTodo(title: String, deadline: String, taskDetail: String, isCompleted: Boolean, mode: ModeInEdit
+    ) {
+        goEditScreen(title, deadline, taskDetail, isCompleted, mode)
     }
 }
